@@ -1,0 +1,9 @@
+prefix=/usr/local
+libdir=/home/fishershi/UDACITY/Term2/Project5/UDACITY_MPC/Ipopt/ThirdParty/ASL
+
+Name: ASL
+Description: AMPL Solver Library
+URL: https://projects.coin-or.org/BuildTools
+Version: 1.3.6
+Libs: ${libdir}/libcoinasl.la -lm -ldl 
+Cflags: -I/home/fishershi/UDACITY/Term2/Project5/UDACITY_MPC/Ipopt/ThirdParty/ASL -I/home/fishershi/UDACITY/Term2/Project5/UDACITY_MPC/Ipopt/ThirdParty/ASL/solvers

@@ -1,0 +1,16 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/fishershi/UDACITY/Term2/Project5/UDACITY_MPC/src/Eigen-3.3/test/geo_parametrizedline.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"BuildOfficial"
+		],
+		"name" : "geo_parametrizedline_2"
+	}
+}

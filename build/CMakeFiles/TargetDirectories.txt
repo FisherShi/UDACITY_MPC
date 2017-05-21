@@ -1,0 +1,3 @@
+/home/fishershi/UDACITY/Term2/Project5/UDACITY_MPC/build/CMakeFiles/edit_cache.dir
+/home/fishershi/UDACITY/Term2/Project5/UDACITY_MPC/build/CMakeFiles/rebuild_cache.dir
+/home/fishershi/UDACITY/Term2/Project5/UDACITY_MPC/build/CMakeFiles/mpc.dir

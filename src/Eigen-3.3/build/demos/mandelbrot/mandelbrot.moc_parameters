@@ -1,0 +1,7 @@
+-I/home/fishershi/UDACITY/Term2/Project5/UDACITY_MPC/src/Eigen-3.3
+-I/home/fishershi/UDACITY/Term2/Project5/UDACITY_MPC/src/Eigen-3.3/build
+-I/usr/include/qt4
+-DNDEBUG
+-o
+/home/fishershi/UDACITY/Term2/Project5/UDACITY_MPC/src/Eigen-3.3/build/demos/mandelbrot/mandelbrot.moc
+/home/fishershi/UDACITY/Term2/Project5/UDACITY_MPC/src/Eigen-3.3/demos/mandelbrot/mandelbrot.h

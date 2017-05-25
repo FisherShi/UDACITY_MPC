@@ -87,61 +87,68 @@ int main() {
                     // j[1] is the data JSON object
                     vector<double> ptsx = j[1]["ptsx"];
                     vector<double> ptsy = j[1]["ptsy"];
-
-                    //convert vetor<double> to VectorXd
-                    double* x_ptr = &ptsx[0];
-                    Eigen::Map<Eigen::VectorXd> ptsx_xd(x_ptr, ptsx.size());
-                    double* y_ptr = &ptsy[0];
-                    Eigen::Map<Eigen::VectorXd> ptsy_xd(y_ptr, ptsx.size());
-
                     double px = j[1]["x"];
                     double py = j[1]["y"];
                     double psi = j[1]["psi"];
                     double v = j[1]["speed"];
 
-                    /*
-                    * TODO: Calculate steering angle and throttle using MPC.
-                    *
-                    * Both are in between [-1, 1].
-                    *
-                    */
-                    //fit to a 2 order polynomial
-                    auto coeffs = polyfit(ptsx_xd, ptsy_xd, 2);
+                    //convert ptsx&ptsy to vehicle coordinate
+                    vector<double> ptsx_car;
+                    vector<double> ptsy_car;
+                    for(int i=0;i<ptsx.size();i++) {
+                        double x = ptsx[i] - px;
+                        double y = ptsy[i] - py;
+                        ptsx_car.push_back(x * cos(-psi) - y * sin(-psi));
+                        ptsy_car.push_back(x * sin(-psi) + y * cos(-psi));
+                    }
+
+                    //convert vetor<double> to VectorXd for polyfit function
+                    double* x_ptr = &ptsx_car[0];
+                    Eigen::Map<Eigen::VectorXd> ptsx_xd(x_ptr, ptsx_car.size());
+                    double* y_ptr = &ptsy_car[0];
+                    Eigen::Map<Eigen::VectorXd> ptsy_xd(y_ptr, ptsx_car.size());
+
+                    //fit to a 3 degree polynomial
+                    auto coeffs = polyfit(ptsx_xd, ptsy_xd, 3);
+                    //calculate cte; px, py become 0 in vehicle coordinate
+                    px = 0; // need to consider latency
+                    py = 0;
                     double cte = polyeval(coeffs, px) - py;
-                    double epsi = psi - atan(coeffs[1] + (2 * coeffs[2] * px));
+                    //orientation errer of a 3 degree polynomial
+                    double epsi = -atan(coeffs[1] + 2 * px * coeffs[2] + 3 * px * px * coeffs[3]);
 
                     //create a state vector
                     Eigen::VectorXd state(6);
-                    state << px, py, psi, v, cte, epsi;
+                    //in vehicle coordinate, px, py, and psi are 0
+                    state << 0, 0, 0, v, cte, epsi;
 
                     //run mpc
                     auto vars = mpc.Solve(state, coeffs);
+                    cout << "var size: " << vars.size() << endl;
 
                     //get actuators
-                    double steer_value = vars[6];
-                    double throttle_value = vars[7];
+                    double steer_value = -vars[0];
+                    double throttle_value = vars[1];
+
                     json msgJson;
                     msgJson["steering_angle"] = steer_value;
                     msgJson["throttle"] = throttle_value;
 
-                    //update state
-                    state << vars[0], vars[1], vars[2], vars[3], vars[4], vars[5];
-
                     //Display the MPC predicted trajectory
                     vector<double> mpc_x_vals;
                     vector<double> mpc_y_vals;
-                    mpc_x_vals.push_back(vars[0]);
-                    mpc_y_vals.push_back(vars[1]);
+                    int ptr = (vars.size()-2)/2;
+                    for (int i=2;i < ptr;i++){
+                        mpc_x_vals.push_back(vars[i]);
+                        mpc_y_vals.push_back(vars[i+ptr]);
+                    }
                     msgJson["mpc_x"] = mpc_x_vals;
                     msgJson["mpc_y"] = mpc_y_vals;
+                    //what's the size of var?
 
                     //Display the waypoints/reference line
-                    vector<double> next_x_vals;
-                    vector<double> next_y_vals;
-                    next_x_vals = ptsx;
-                    next_y_vals = ptsy;
-                    msgJson["next_x"] = next_x_vals;
-                    msgJson["next_y"] = next_y_vals;
+                    msgJson["next_x"] = ptsx_car;
+                    msgJson["next_y"] = ptsy_car;
 
                     auto msg = "42[\"steer\"," + msgJson.dump() + "]";
                     std::cout << msg << std::endl;
